@@ -37,6 +37,8 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
     let IRREGULAR_HEART_RATE_EVENT = "IRREGULAR_HEART_RATE_EVENT"
     let LOW_HEART_RATE_EVENT = "LOW_HEART_RATE_EVENT"
     let RESTING_HEART_RATE = "RESTING_HEART_RATE"
+    let RESPIRATORY_RATE = "RESPIRATORY_RATE"
+    let PERIPHERAL_PERFUSION_INDEX = "PERIPHERAL_PERFUSION_INDEX"
     let STEPS = "STEPS"
     let WAIST_CIRCUMFERENCE = "WAIST_CIRCUMFERENCE"
     let WALKING_HEART_RATE = "WALKING_HEART_RATE"
@@ -104,6 +106,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
     let COUNT = "COUNT"
     let PERCENT = "PERCENT"
     let BEATS_PER_MINUTE = "BEATS_PER_MINUTE"
+    let RESPIRATIONS_PER_MINUTE = "RESPIRATIONS_PER_MINUTE"
     let MILLIGRAM_PER_DECILITER = "MILLIGRAM_PER_DECILITER"
     let UNKNOWN_UNIT = "UNKNOWN_UNIT"
     let NO_UNIT = "NO_UNIT"
@@ -446,6 +449,8 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         let startTime = (arguments?["startTime"] as? NSNumber) ?? 0
         let endTime = (arguments?["endTime"] as? NSNumber) ?? 0
         let limit = (arguments?["limit"] as? Int) ?? HKObjectQueryNoLimit
+
+        print("Get data is called")
         
         // Convert dates from milliseconds to Date()
         let dateFrom = Date(timeIntervalSince1970: startTime.doubleValue / 1000)
@@ -462,7 +467,14 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         
         let query = HKSampleQuery(sampleType: dataType, predicate: predicate, limit: limit, sortDescriptors: [sortDescriptor]) { [self]
             x, samplesOrNil, error in
-            
+
+            print("dataType is \(dataType)")
+            print("predicate is \(predicate)")
+            print("limit is \(limit)")
+            print("sortDescriptor is \(sortDescriptor)")
+            print("samplesOrNil is \(samplesOrNil)")
+            print("x is \(x)")
+            print("error is \(error)")
             switch samplesOrNil {
             case let (samples as [HKQuantitySample]) as Any:
                 let dictionaries = samples.map { sample -> NSDictionary in
@@ -572,7 +584,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                     }
                 } else {
                     DispatchQueue.main.async {
-                        print("Error getting ECG - only available on iOS 14.0 and above!")
+                        print("Error getting \(arguments) - only available on iOS 14.0 and above!")
                         result(nil)
                     }
                 }
@@ -715,6 +727,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         unitDict[COUNT] = HKUnit.count()
         unitDict[PERCENT] = HKUnit.percent()
         unitDict[BEATS_PER_MINUTE] = HKUnit.init(from: "count/min")
+        unitDict[RESPIRATIONS_PER_MINUTE] = HKUnit.init(from: "count/min")
         unitDict[MILLIGRAM_PER_DECILITER] = HKUnit.init(from: "mg/dL")
         unitDict[UNKNOWN_UNIT] = HKUnit.init(from: "")
         unitDict[NO_UNIT] = HKUnit.init(from: "")
@@ -811,6 +824,8 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             dataTypesDict[BASAL_ENERGY_BURNED] = HKSampleType.quantityType(forIdentifier: .basalEnergyBurned)!
             dataTypesDict[BLOOD_GLUCOSE] = HKSampleType.quantityType(forIdentifier: .bloodGlucose)!
             dataTypesDict[BLOOD_OXYGEN] = HKSampleType.quantityType(forIdentifier: .oxygenSaturation)!
+            dataTypesDict[RESPIRATORY_RATE] = HKSampleType.quantityType(forIdentifier: .respiratoryRate)!
+            dataTypesDict[PERIPHERAL_PERFUSION_INDEX] = HKSampleType.quantityType(forIdentifier: .peripheralPerfusionIndex)!
             dataTypesDict[BLOOD_PRESSURE_DIASTOLIC] = HKSampleType.quantityType(forIdentifier: .bloodPressureDiastolic)!
             dataTypesDict[BLOOD_PRESSURE_SYSTOLIC] = HKSampleType.quantityType(forIdentifier: .bloodPressureSystolic)!
             dataTypesDict[BODY_FAT_PERCENTAGE] = HKSampleType.quantityType(forIdentifier: .bodyFatPercentage)!
